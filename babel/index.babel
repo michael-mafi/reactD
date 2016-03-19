@@ -1,0 +1,130 @@
+/* jshint esversion:6 */
+
+class Recipe extends React.Component{
+  constructor(){
+    super();
+    // default state of Recipe....
+    this.state ={
+      editing: false
+    };
+  }
+  componentDidMount(){
+      $(ReactDOM.findDOMNode(this)).draggable({snap: true});
+    }
+  renderDisplay() {
+      return (
+        <div className = "recipe" >
+          <p>{this.props.children.match(/^.*\b(.*)\b.*$/m)}</p>
+          <div className = "edit-remove-span">
+
+          <span>
+            <button onClick = {this.edit.bind(this)}
+              className = "btn btn-lg btn-primary glyphicon glyphicon-eye-open" />
+            <button onClick = {this.remove.bind(this)}
+              className = "btn btn-lg btn-danger  glyphicon glyphicon-trash" />
+          </span>
+          </div>
+        </div>
+      );
+    }
+  save() {
+    let val = this.refs.newText.value;
+    this.props.onChange(this.refs.newText.value, this.props.index); //maybe...
+    this.setState({
+      editing: false
+    });
+  }
+  edit(){
+    this.setState({
+      editing: true
+    });
+  }
+  remove(){
+    this.props.onRemove(this.props.index);
+  }
+  renderForm() {
+      return(
+        <div className="recipe">
+
+          <textarea ref ="newText" defaultValue={this.props.children}
+            className="form-control"></textarea>
+          <button onClick={this.save.bind(this)} className="btn-save btn btn-success btn-md glyphicon glyphicon-ok">
+
+
+          </button>
+        </div>
+      );
+    }
+  render() {
+       // boolean
+      if (this.state.editing) {
+        return this.renderForm();
+      }else {
+        return this.renderDisplay();
+      }
+    }
+  }
+
+class RecipeList extends React.Component{
+  constructor(){
+    super();
+    // default state of Recipe....
+    this.state ={
+      recipes:[]
+    };
+  }
+  update(newText, i){
+    let bagelarr = this.state.recipes;
+    bagelarr[i] = newText;
+    this.setState({recipes:bagelarr});
+    // Once Recipe is Saved, save updated bagelarray to local....
+    let savedRecipeArr = this.state.recipes;
+    localStorage.setItem("recipes", JSON.stringify(savedRecipeArr));
+  }
+  remove(i){
+    let bagelarr = this.state.recipes;
+    bagelarr.splice(i, 1);
+    this.setState({recipes:bagelarr});
+    // If Recipe is removed, update local storage by removing x recipe.
+    let removeRecipeArr = this.state.recipes;
+    localStorage.setItem("recipes", JSON.stringify(removeRecipeArr));
+  }
+  componentDidMount(){
+    let retrievedData = localStorage.getItem("recipes");
+    // console.log(retrievedData);
+    JSON.parse(retrievedData).map( r => this.add(r) );
+  }
+  add(text){
+    let bagelarr = this.state.recipes;
+    bagelarr.push(text);
+    this.setState({
+      recipes: bagelarr
+    });
+  }
+  eachRecipe(recipe, i){
+    return (
+        <Recipe key={i}
+            index={i}
+            onChange={this.update.bind(this)}
+            onRemove={this.remove.bind(this)}
+          >{recipe}</Recipe>
+    );
+  }
+  render(){
+    return(
+      <div className="recipe_container">
+        <h1> Draggable ToDo List in React </h1>
+        <div id="add_new_recipe_container">
+        <button id="add_recipe" className="btn btn-md btn-success"
+        onClick={this.add.bind(this, "New Recipe")}>
+        <i className="material-icons">add</i></button>
+        </div>
+        {this.state.recipes.map(this.eachRecipe.bind(this))}
+      </div>
+    );
+  }
+}
+
+ReactDOM.render(
+  <RecipeList />,
+    document.getElementById("bagel"));

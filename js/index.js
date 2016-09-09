@@ -210,7 +210,7 @@ var RecipeList = function(_React$Component2) {
       React.createElement(
         "h1",
         null,
-        " React Todo "
+        " React Draggable Post it Note Board  "
       ),
       React.createElement(
         "div", {
